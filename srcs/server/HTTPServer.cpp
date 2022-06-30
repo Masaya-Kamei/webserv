@@ -2,6 +2,7 @@
 #include "HTTPServer.hpp"
 #include "ListenSocket.hpp"
 #include "debug.hpp"
+#include "HTTPResponse.hpp"
 
 HTTPServer::HTTPServer()
 {
@@ -52,7 +53,7 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 	std::string		recv_msg;
 	// std::string		send_msg;
 	// HTTPRequest		req;
-	// HTTPResponse		res;
+	HTTPResponse		res;
 
 	recv_msg = ssocket->RecvRequest();
 	if (recv_msg.size() == 0)
@@ -62,6 +63,8 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 		std::cout << "[recv_msg]\n" << recv_msg << std::endl;
 		// req.ParseRequest();
 		// send_msg = res.CreateResponse(req);
+		std::string path = "/index.html";
+		recv_msg = res.CreateResponse(path);
 		// ssocket->SendResponse(send_msg);
 		ssocket->SendResponse(recv_msg);
 	}
