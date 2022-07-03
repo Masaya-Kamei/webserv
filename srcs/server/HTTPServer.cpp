@@ -63,8 +63,7 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 		std::cout << "[recv_msg]\n" << recv_msg << std::endl;
 		// req.ParseRequest();
 		// send_msg = res.CreateResponse(req);
-		std::string path = "/index.html";
-		recv_msg = res.CreateResponse(path);
+		recv_msg = res.CreateResponse();
 		// ssocket->SendResponse(send_msg);
 		ssocket->SendResponse(recv_msg);
 	}

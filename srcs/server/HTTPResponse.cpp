@@ -1,6 +1,10 @@
 #include <sstream>
+#include <iostream>
+#include <fcntl.h>
+#include <unistd.h>
 #include "HTTPResponse.hpp"
 
+const size_t HTTPResponse::BUF_SIZE = 8192;
 const std::map<int, std::string> HTTPResponse::STATUS_MSG = SetStatusMsg();
 
 HTTPResponse::HTTPResponse(): sent_byte_(0)
@@ -15,27 +19,121 @@ void HTTPResponse::Clear()
 {
 	headers_.clear();
 	res_msg_.clear();
-	sent_byte_ = 0;
 	body_.clear();
+	sent_byte_ = 0;
 }
 
-std::string HTTPResponse::CreateResponse(std::string path)
+void HTTPResponse::SetRequest()
 {
-	bool keep_alive = true;
+	rq_.insert(std::make_pair("method", "GET"));
+	rq_.insert(std::make_pair("http", "HTTP/1.1"));
+	// rq_.insert(std::make_pair("path", "html/index.html"));
+	rq_.insert(std::make_pair("path", "html/no.html"));
+	rq_.insert(std::make_pair("connection", "keep_alive"));
+}
 
-	if (path == "/index.html")
+void HTTPResponse::Paser()
+{
+	// add header_elem
+	ParseRqHeader();
+	// body
+	CreateBody();
+}
+
+void HTTPResponse::ParseRqHeader()
+{
+	path_ = rq_["path"];
+	http_ = rq_["http"];
+	if (rq_["connection"] == "keep_alive")
 	{
-		SetStatusCode(CODE_200);
+		connection_ = true;
 	} else {
-		SetStatusCode(CODE_409);
+		connection_ = false;
 	}
-	SetResponse(keep_alive);
+	// SetHeader(make_pair());
+}
+
+void HTTPResponse::CreateBody()
+{
+	OpenFile();
+	ReadFile();
+}
+
+void HTTPResponse::OpenFile()
+{
+	file_fd_ = open(path_.c_str(), O_RDONLY);
+	if (file_fd_ < 0)
+    {
+        HandleError(CODE_404);
+    } else {
+        SetStatusCode(CODE_200);
+	}
+}
+
+void HTTPResponse::CloseFile()
+{
+	close(file_fd_);
+}
+
+void HTTPResponse::ReadFile()
+{
+	char buffer[BUF_SIZE];
+    ssize_t read_byte = read(file_fd_, buffer, BUF_SIZE - 1);
+
+	if (read_byte < 0)
+	{
+        CloseFile();
+        // HandleError(CODE_500);
+        return;
+    }
+    if (read_byte == 0)
+    {
+        CloseFile();
+        return;
+    }
+    buffer[read_byte] = '\0';
+    AppendBody(buffer, read_byte);
+	CloseFile();
+}
+
+void HTTPResponse::AppendBody(const char *buffer, size_t size)
+{
+	body_.append(buffer, size);
+}
+
+void HTTPResponse::HandleError(int statusCode)
+{
+    Clear();
+    SetStatusCode(statusCode);
+    SetBody(GenerateHTML(statusCode));
+}
+
+std::string HTTPResponse::GenerateHTML(int statusCode) const
+{
+    std::stringstream ss;
+
+    std::string status_msg = this->STATUS_MSG.find(statusCode)->second;
+    ss << "<html>" << "\r\n"
+       << "<head><title>" << statusCode << " " << status_msg << "</title></head>" << "\r\n"
+       << "<body>" << "\r\n"
+       << "<center><h1>" << statusCode << " " << status_msg << "</h1></center>" << "\r\n"
+       << "<hr><center>webserv</center>" << "\r\n"
+       << "</body>" << "\r\n"
+       << "</html>" << "\r\n";
+    return ss.str();
+}
+
+std::string HTTPResponse::CreateResponse()
+{
+	SetRequest();
+	Paser();
+	SetResponse(connection_);
 	return res_msg_;
 }
 
-void HTTPResponse::SetResponse(bool keep_alive)
+void HTTPResponse::SetResponse(bool connection)
 {
-	connection_ = keep_alive;
+	connection_ = connection;
 	res_msg_ = ToString();
 }
 
@@ -69,7 +167,7 @@ const std::map<std::string, std::string> HTTPResponse::GetHeaders() const
 	return headers_;
 }
 
-const std::string &HTTPResponse::GetMessage() const
+const std::string &HTTPResponse::GetResMessage() const
 {
 	return res_msg_;
 }
@@ -86,7 +184,7 @@ std::string HTTPResponse::ToString()
 	std::stringstream ss;
 
 	SetHeaderField();
-	ss << "HTTP/1.1 " << status_code_ << " " << status_msg << "\r\n";
+	ss << http_ << " " << status_code_ << " " << status_msg << "\r\n";
 	for (std::map<std::string, std::string>::iterator ite = headers_.begin();
 		 ite != headers_.end(); ite++)
 	{
