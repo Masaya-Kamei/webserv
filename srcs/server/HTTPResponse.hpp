@@ -5,6 +5,7 @@
 # include <ctime>
 # include <map>
 # include <fstream>
+# include "ServerSocket.hpp"
 
 class HTTPResponse
 {
@@ -12,6 +13,7 @@ class HTTPResponse
 		HTTPResponse();
 		~HTTPResponse();
 
+		void SendResponse(ServerSocket *ssocket);
 		std::string CreateResponse();
 
 	private:

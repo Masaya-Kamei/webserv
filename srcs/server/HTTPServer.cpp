@@ -48,23 +48,31 @@ void	HTTPServer::MainLoop(EventQueue const & equeue) const
 	}
 }
 
-void	HTTPServer::Communication(ServerSocket *ssocket) const
+void    HTTPServer::Communication(ServerSocket *ssocket) const
 {
-	std::string		recv_msg;
-	// std::string		send_msg;
-	// HTTPRequest		req;
-	HTTPResponse		res;
+	// std::string  recv_msg;
+	// int            status_code;
+	// HTTPRequest    req;
+	// HTTPMethod      method;
 
-	recv_msg = ssocket->RecvRequest();
-	if (recv_msg.size() == 0)
-		delete ssocket;
-	else
-	{
-		std::cout << "[recv_msg]\n" << recv_msg << std::endl;
-		// req.ParseRequest();
-		// send_msg = res.CreateResponse(req);
-		recv_msg = res.CreateResponse();
-		// ssocket->SendResponse(send_msg);
-		ssocket->SendResponse(recv_msg);
-	}
+	// try
+	// {
+	// 	recv_msg = req.RecvRequest(ssocket);
+	// 	if (recv_msg.size() == 0)
+	// 	{
+	// 	delete ssocket;
+	// 	return;
+	// 	}
+	// 	// status_code = method.ExecHTTPMethod(req);
+	// }
+	// catch
+	// {
+	// 	if (HTTPError ではない場合)
+	// 	throw;
+	// 	status_code = ?;
+	// }
+	// HTTPResponse res(status_code, method, req?);
+	HTTPResponse res;
+
+	res.SendResponse(ssocket);
 }

@@ -1,5 +1,6 @@
 #include <sstream>
 #include <iostream>
+#include <sys/socket.h>
 #include "HTTPResponse.hpp"
 
 const size_t HTTPResponse::BUF_SIZE = 8192;
@@ -19,6 +20,14 @@ void HTTPResponse::Clear()
 	res_msg_.clear();
 	body_.clear();
 	sent_byte_ = 0;
+}
+
+void HTTPResponse::SendResponse(ServerSocket *ssocket)
+{
+	CreateResponse();
+	ssize_t send_size = send(ssocket->GetFd(), res_msg_.c_str(), res_msg_.size(), 0);
+	if (send_size == -1)
+		throw std::runtime_error("send error");
 }
 
 void HTTPResponse::SetRequest()
