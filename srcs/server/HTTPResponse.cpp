@@ -1,7 +1,5 @@
 #include <sstream>
 #include <iostream>
-#include <fcntl.h>
-#include <unistd.h>
 #include "HTTPResponse.hpp"
 
 const size_t HTTPResponse::BUF_SIZE = 8192;
@@ -27,8 +25,8 @@ void HTTPResponse::SetRequest()
 {
 	rq_.insert(std::make_pair("method", "GET"));
 	rq_.insert(std::make_pair("http", "HTTP/1.1"));
-	// rq_.insert(std::make_pair("path", "html/index.html"));
-	rq_.insert(std::make_pair("path", "html/no.html"));
+	rq_.insert(std::make_pair("path", "html/index.html"));
+	// rq_.insert(std::make_pair("path", "html/no.html"));
 	rq_.insert(std::make_pair("connection", "keep_alive"));
 }
 
@@ -50,62 +48,53 @@ void HTTPResponse::ParseRqHeader()
 	} else {
 		connection_ = false;
 	}
-	// SetHeader(make_pair());
 }
 
 void HTTPResponse::CreateBody()
 {
 	OpenFile();
-	ReadFile();
+	if (status_code_ == 200)
+	{
+		ReadFile();
+	}
 }
 
 void HTTPResponse::OpenFile()
 {
-	file_fd_ = open(path_.c_str(), O_RDONLY);
-	if (file_fd_ < 0)
+	ifs_.open(path_.c_str());
+	if (!ifs_)
     {
-        HandleError(CODE_404);
+        HandleError(404);
     } else {
-        SetStatusCode(CODE_200);
+        status_code_ = 200;
 	}
-}
-
-void HTTPResponse::CloseFile()
-{
-	close(file_fd_);
 }
 
 void HTTPResponse::ReadFile()
 {
 	char buffer[BUF_SIZE];
-    ssize_t read_byte = read(file_fd_, buffer, BUF_SIZE - 1);
+	ssize_t read_byte;
 
-	if (read_byte < 0)
+	while (!ifs_.eof())
 	{
-        CloseFile();
-        // HandleError(CODE_500);
-        return;
-    }
-    if (read_byte == 0)
-    {
-        CloseFile();
-        return;
-    }
-    buffer[read_byte] = '\0';
-    AppendBody(buffer, read_byte);
-	CloseFile();
+		ifs_.read(buffer, BUF_SIZE - 1);
+		read_byte = ifs_.gcount();
+		buffer[read_byte] = '\0';
+		AppendBody(buffer);
+	}
+	ifs_.close();
 }
 
-void HTTPResponse::AppendBody(const char *buffer, size_t size)
+void HTTPResponse::AppendBody(const char *buffer)
 {
-	body_.append(buffer, size);
+	body_.append(buffer);
 }
 
 void HTTPResponse::HandleError(int statusCode)
 {
     Clear();
-    SetStatusCode(statusCode);
-    SetBody(GenerateHTML(statusCode));
+    status_code_ = statusCode;
+    body_ = GenerateHTML(statusCode);
 }
 
 std::string HTTPResponse::GenerateHTML(int statusCode) const
@@ -137,44 +126,9 @@ void HTTPResponse::SetResponse(bool connection)
 	res_msg_ = ToString();
 }
 
-void HTTPResponse::SetStatusCode(int status_code)
-{
-	status_code_ = status_code;
-}
-
 void HTTPResponse::SetHeader(const std::pair<std::string, std::string> &elem)
 {
 	headers_.insert(elem);
-}
-
-void HTTPResponse::SetBody(const std::string &body)
-{
-	body_ = body;
-}
-
-void HTTPResponse::SetSentByte(size_t sent_byte)
-{
-	sent_byte_ = sent_byte;
-}
-
-int HTTPResponse::GetStatusCode() const
-{
-	return status_code_;
-}
-
-const std::map<std::string, std::string> HTTPResponse::GetHeaders() const
-{
-	return headers_;
-}
-
-const std::string &HTTPResponse::GetResMessage() const
-{
-	return res_msg_;
-}
-
-size_t HTTPResponse::GetSentByte() const
-{
-	return sent_byte_;
 }
 
 /* private */
@@ -195,73 +149,6 @@ std::string HTTPResponse::ToString()
 	return ss.str();
 }
 
-std::map<int, std::string> HTTPResponse::SetStatusMsg()
-{
-	std::map<int, std::string> status_msg;
-
-	status_msg[CODE_100] = "Continue";
-    status_msg[CODE_101] = "Switching Protocols";
-    status_msg[CODE_102] = "Processing";
-    status_msg[CODE_103] = "Early Hints";
-    status_msg[CODE_200] = "OK";
-    status_msg[CODE_201] = "Created";
-    status_msg[CODE_202] = "Accepted";
-    status_msg[CODE_203] = "Non-Authoritative Information";
-    status_msg[CODE_204] = "No Content";
-    status_msg[CODE_205] = "Reset Content";
-    status_msg[CODE_206] = "Partial Content";
-    status_msg[CODE_207] = "Multi-Status";
-    status_msg[CODE_208] = "Already Reported";
-    status_msg[CODE_226] = "IM Used";
-    status_msg[CODE_300] = "Multiple Choice";
-    status_msg[CODE_301] = "Moved Permanently";
-    status_msg[CODE_302] = "Found";
-    status_msg[CODE_303] = "See Other";
-    status_msg[CODE_304] = "Not Modified";
-    status_msg[CODE_307] = "Temporary Redirect";
-    status_msg[CODE_308] = "Permanent Redirect";
-    status_msg[CODE_400] = "Bad Request";
-    status_msg[CODE_401] = "Unauthorized";
-    status_msg[CODE_402] = "Payment Required";
-    status_msg[CODE_403] = "Forbidden";
-    status_msg[CODE_404] = "Not Found";
-    status_msg[CODE_405] = "Method Not Allowed";
-    status_msg[CODE_406] = "Not Acceptable";
-    status_msg[CODE_407] = "Proxy Authentication Required";
-    status_msg[CODE_408] = "Request Timeout";
-    status_msg[CODE_409] = "Conflict";
-    status_msg[CODE_410] = "Gone";
-    status_msg[CODE_411] = "Length Required";
-    status_msg[CODE_412] = "Precondition Failed";
-    status_msg[CODE_413] = "Payload Too Large";
-    status_msg[CODE_414] = "URI Too Long";
-    status_msg[CODE_415] = "Unsupported Media Type";
-    status_msg[CODE_416] = "Range Not Satisfiable";
-    status_msg[CODE_417] = "Expectation Failed";
-    status_msg[CODE_418] = "I'm a teapot";
-    status_msg[CODE_421] = "Misdirected Request";
-    status_msg[CODE_422] = "Unprocessable Entity";
-    status_msg[CODE_423] = "Locked";
-    status_msg[CODE_424] = "Failed Dependency";
-    status_msg[CODE_425] = "Too Early";
-    status_msg[CODE_426] = "Upgrade Required";
-    status_msg[CODE_428] = "Precondition Required";
-    status_msg[CODE_429] = "Too Many Requests";
-    status_msg[CODE_431] = "Request Header Fields Too Large";
-    status_msg[CODE_451] = "Unavailable For Legal Reasons";
-    status_msg[CODE_500] = "Internal Server Error";
-    status_msg[CODE_501] = "Not Implemented";
-    status_msg[CODE_502] = "Bad Gateway";
-    status_msg[CODE_503] = "Service Unavailable";
-    status_msg[CODE_504] = "Gateway Timeout";
-    status_msg[CODE_505] = "HTTP Version Not Supported";
-    status_msg[CODE_506] = "Variant Also Negotiates";
-    status_msg[CODE_507] = "Insufficient Storage";
-    status_msg[CODE_508] = "Loop Detected";
-    status_msg[CODE_510] = "Not Extended";
-    status_msg[CODE_511] = "Network Authentication Required";
-    return status_msg;
-}
 
 std::string HTTPResponse::FindStatusMassage(int status_code) const
 {
@@ -312,4 +199,72 @@ std::string HTTPResponse::GetDate() const
 	asctime_r(localtime_r(&now, &current_time), str);
 	strftime(str, sizeof(str), "%a, %d %b %Y %H:%M:%S GMT", &current_time);
     return str;
+}
+
+std::map<int, std::string> HTTPResponse::SetStatusMsg()
+{
+	std::map<int, std::string> status_msg;
+
+	status_msg[100] = "Continue";
+    status_msg[101] = "Switching Protocols";
+    status_msg[102] = "Processing";
+    status_msg[103] = "Early Hints";
+    status_msg[200] = "OK";
+    status_msg[201] = "Created";
+    status_msg[202] = "Accepted";
+    status_msg[203] = "Non-Authoritative Information";
+    status_msg[204] = "No Content";
+    status_msg[205] = "Reset Content";
+    status_msg[206] = "Partial Content";
+    status_msg[207] = "Multi-Status";
+    status_msg[208] = "Already Reported";
+    status_msg[226] = "IM Used";
+    status_msg[300] = "Multiple Choice";
+    status_msg[301] = "Moved Permanently";
+    status_msg[302] = "Found";
+    status_msg[303] = "See Other";
+    status_msg[304] = "Not Modified";
+    status_msg[307] = "Temporary Redirect";
+    status_msg[308] = "Permanent Redirect";
+    status_msg[400] = "Bad Request";
+    status_msg[401] = "Unauthorized";
+    status_msg[402] = "Payment Required";
+    status_msg[403] = "Forbidden";
+    status_msg[404] = "Not Found";
+    status_msg[405] = "Method Not Allowed";
+    status_msg[406] = "Not Acceptable";
+    status_msg[407] = "Proxy Authentication Required";
+    status_msg[408] = "Request Timeout";
+    status_msg[409] = "Conflict";
+    status_msg[410] = "Gone";
+    status_msg[411] = "Length Required";
+    status_msg[412] = "Precondition Failed";
+    status_msg[413] = "Payload Too Large";
+    status_msg[414] = "URI Too Long";
+    status_msg[415] = "Unsupported Media Type";
+    status_msg[416] = "Range Not Satisfiable";
+    status_msg[417] = "Expectation Failed";
+    status_msg[418] = "I'm a teapot";
+    status_msg[421] = "Misdirected Request";
+    status_msg[422] = "Unprocessable Entity";
+    status_msg[423] = "Locked";
+    status_msg[424] = "Failed Dependency";
+    status_msg[425] = "Too Early";
+    status_msg[426] = "Upgrade Required";
+    status_msg[428] = "Precondition Required";
+    status_msg[429] = "Too Many Requests";
+    status_msg[431] = "Request Header Fields Too Large";
+    status_msg[451] = "Unavailable For Legal Reasons";
+    status_msg[500] = "Internal Server Error";
+    status_msg[501] = "Not Implemented";
+    status_msg[502] = "Bad Gateway";
+    status_msg[503] = "Service Unavailable";
+    status_msg[504] = "Gateway Timeout";
+    status_msg[505] = "HTTP Version Not Supported";
+    status_msg[506] = "Variant Also Negotiates";
+    status_msg[507] = "Insufficient Storage";
+    status_msg[508] = "Loop Detected";
+    status_msg[510] = "Not Extended";
+    status_msg[511] = "Network Authentication Required";
+    return status_msg;
 }

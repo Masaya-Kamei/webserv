@@ -4,7 +4,7 @@
 # include <string>
 # include <ctime>
 # include <map>
-# include "HTTPStatusCode.hpp"
+# include <fstream>
 
 class HTTPResponse
 {
@@ -12,20 +12,7 @@ class HTTPResponse
 		HTTPResponse();
 		~HTTPResponse();
 
-		void Clear();
 		std::string CreateResponse();
-		void SetResponse(bool connection);
-
-		void SetStatusCode(int status_code);
-		void SetHeader(const std::pair<std::string, std::string> &elem);
-		void SetBody(const std::string &body);
-		void SetSentByte(size_t sent_byte);
-		void AppendBody(const char *body, size_t size);
-
-		int GetStatusCode() const;
-		const std::map<std::string, std::string> GetHeaders() const;
-		const std::string &GetResMessage() const;
-		size_t GetSentByte() const;
 
 	private:
 		static const size_t BUF_SIZE;
@@ -41,7 +28,7 @@ class HTTPResponse
 		std::map<std::string, std::string> rq_;
 		std::string path_;
 		std::string http_;
-		int file_fd_;
+		std::ifstream ifs_;
 
 		void SetRequest();
 		void Paser();
@@ -49,16 +36,19 @@ class HTTPResponse
 		void CreateBody();
 		void OpenFile();
 		void ReadFile();
-		void CloseFile();
 		void HandleError(int status_code);
 		std::string GenerateHTML(int status_code) const;
+		void AppendBody(const char *buffer);
 
 		/* response */
+		void SetResponse(bool connection);
 		std::string ToString();
+		void SetHeader(const std::pair<std::string, std::string> &elem);
 		void SetHeaderField();
 		std::string FindStatusMassage(int status_code) const;
 		static std::map<int, std::string> SetStatusMsg();
 		std::string GetDate() const;
+		void Clear();
 };
 
 #endif  // HTTPRESPONSE_HPP
