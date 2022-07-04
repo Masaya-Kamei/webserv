@@ -4,6 +4,7 @@
 #include "debug.hpp"
 #include "HTTPMethod.hpp"
 #include "HTTPResponse.hpp"
+#include "HTTPError.hpp"
 
 HTTPServer::HTTPServer()
 {
@@ -56,8 +57,8 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 	// HTTPRequest    req;
 	HTTPMethod      method;
 
-	// try
-	// {
+	try
+	{
 	// 	recv_msg = req.RecvRequest(ssocket);
 	// 	if (recv_msg.size() == 0)
 	// 	{
@@ -65,14 +66,15 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 	// 	return;
 	// 	}
 		// status_code = method.ExecHTTPMethod(req);
-	// }
-	// catch
-	// {
-	// 	if (HTTPError ではない場合)
-	// 	throw;
-	// 	status_code = ?;
-	// }
-	method.ExecHTTPMethod();
+		method.ExecHTTPMethod();
+	}
+	catch (std::exception &e)
+	{
+		std::cout << e.what() << std::endl;
+		// 	if (HTTPError ではない場合)
+		// 	throw;
+		// 	status_code = ?;
+	}
 	HTTPResponse res(method);
 	res.SendResponse(ssocket);
 }

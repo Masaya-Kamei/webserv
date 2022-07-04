@@ -1,4 +1,5 @@
 #include "HTTPMethod.hpp"
+#include "HTTPError.hpp"
 
 const size_t HTTPMethod::BUF_SIZE = 8192;
 
@@ -27,7 +28,7 @@ void HTTPMethod::HandleFile()
 		ifs_.open(path_.c_str());
 		if (!ifs_)
 		{
-			// throw HTTPError(404);
+			throw HTTPError(404);
 		}
 	}
 }
@@ -57,8 +58,8 @@ void HTTPMethod::ParseReq()
 {
 	method_ = "GET";
 	http_ = "HTTP/1.1";
-	path_ = "html/index.html";
-	// path_ = "html/no.html";
+	// path_ = "html/index.html";
+	path_ = "html/no.html";
 	connection_ =  true;
 }
 /* 
