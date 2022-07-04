@@ -2,6 +2,7 @@
 #include "HTTPServer.hpp"
 #include "ListenSocket.hpp"
 #include "debug.hpp"
+#include "HTTPMethod.hpp"
 #include "HTTPResponse.hpp"
 
 HTTPServer::HTTPServer()
@@ -50,10 +51,10 @@ void	HTTPServer::MainLoop(EventQueue const & equeue) const
 
 void    HTTPServer::Communication(ServerSocket *ssocket) const
 {
-	// std::string  recv_msg;
+	std::string  recv_msg;
 	// int            status_code;
 	// HTTPRequest    req;
-	// HTTPMethod      method;
+	HTTPMethod      method;
 
 	// try
 	// {
@@ -63,7 +64,7 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 	// 	delete ssocket;
 	// 	return;
 	// 	}
-	// 	// status_code = method.ExecHTTPMethod(req);
+		// status_code = method.ExecHTTPMethod(req);
 	// }
 	// catch
 	// {
@@ -71,8 +72,7 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 	// 	throw;
 	// 	status_code = ?;
 	// }
-	// HTTPResponse res(status_code, method, req?);
-	HTTPResponse res;
-
+	method.ExecHTTPMethod();
+	HTTPResponse res(method);
 	res.SendResponse(ssocket);
 }

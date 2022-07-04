@@ -3,11 +3,20 @@
 #include <sys/socket.h>
 #include "HTTPResponse.hpp"
 
-const size_t HTTPResponse::BUF_SIZE = 8192;
 const std::map<int, std::string> HTTPResponse::STATUS_MSG = SetStatusMsg();
 
 HTTPResponse::HTTPResponse(): sent_byte_(0)
 {
+}
+
+HTTPResponse::HTTPResponse(const HTTPMethod &method)
+{
+	status_code_ = method.GetStatusCode();
+	http_ = method.GetHttp();
+	path_ = method.GetPath();
+	body_ = method.GetBody();
+	connection_ = method.GetConnection();
+	SetResponse(connection_);
 }
 
 HTTPResponse::~HTTPResponse()
@@ -24,109 +33,9 @@ void HTTPResponse::Clear()
 
 void HTTPResponse::SendResponse(ServerSocket *ssocket)
 {
-	CreateResponse();
 	ssize_t send_size = send(ssocket->GetFd(), res_msg_.c_str(), res_msg_.size(), 0);
 	if (send_size == -1)
 		throw std::runtime_error("send error");
-}
-
-void HTTPResponse::SetRequest()
-{
-	rq_.insert(std::make_pair("method", "GET"));
-	rq_.insert(std::make_pair("http", "HTTP/1.1"));
-	rq_.insert(std::make_pair("path", "html/index.html"));
-	// rq_.insert(std::make_pair("path", "html/no.html"));
-	rq_.insert(std::make_pair("connection", "keep_alive"));
-}
-
-void HTTPResponse::Paser()
-{
-	// add header_elem
-	ParseRqHeader();
-	// body
-	CreateBody();
-}
-
-void HTTPResponse::ParseRqHeader()
-{
-	path_ = rq_["path"];
-	http_ = rq_["http"];
-	if (rq_["connection"] == "keep_alive")
-	{
-		connection_ = true;
-	} else {
-		connection_ = false;
-	}
-}
-
-void HTTPResponse::CreateBody()
-{
-	OpenFile();
-	if (status_code_ == 200)
-	{
-		ReadFile();
-	}
-}
-
-void HTTPResponse::OpenFile()
-{
-	ifs_.open(path_.c_str());
-	if (!ifs_)
-    {
-        HandleError(404);
-    } else {
-        status_code_ = 200;
-	}
-}
-
-void HTTPResponse::ReadFile()
-{
-	char buffer[BUF_SIZE];
-	ssize_t read_byte;
-
-	while (!ifs_.eof())
-	{
-		ifs_.read(buffer, BUF_SIZE - 1);
-		read_byte = ifs_.gcount();
-		buffer[read_byte] = '\0';
-		AppendBody(buffer);
-	}
-	ifs_.close();
-}
-
-void HTTPResponse::AppendBody(const char *buffer)
-{
-	body_.append(buffer);
-}
-
-void HTTPResponse::HandleError(int statusCode)
-{
-    Clear();
-    status_code_ = statusCode;
-    body_ = GenerateHTML(statusCode);
-}
-
-std::string HTTPResponse::GenerateHTML(int statusCode) const
-{
-    std::stringstream ss;
-
-    std::string status_msg = this->STATUS_MSG.find(statusCode)->second;
-    ss << "<html>" << "\r\n"
-       << "<head><title>" << statusCode << " " << status_msg << "</title></head>" << "\r\n"
-       << "<body>" << "\r\n"
-       << "<center><h1>" << statusCode << " " << status_msg << "</h1></center>" << "\r\n"
-       << "<hr><center>webserv</center>" << "\r\n"
-       << "</body>" << "\r\n"
-       << "</html>" << "\r\n";
-    return ss.str();
-}
-
-std::string HTTPResponse::CreateResponse()
-{
-	SetRequest();
-	Paser();
-	SetResponse(connection_);
-	return res_msg_;
 }
 
 void HTTPResponse::SetResponse(bool connection)
@@ -135,12 +44,6 @@ void HTTPResponse::SetResponse(bool connection)
 	res_msg_ = ToString();
 }
 
-void HTTPResponse::SetHeader(const std::pair<std::string, std::string> &elem)
-{
-	headers_.insert(elem);
-}
-
-/* private */
 std::string HTTPResponse::ToString()
 {
 	std::string status_msg = FindStatusMassage(status_code_);
@@ -208,6 +111,28 @@ std::string HTTPResponse::GetDate() const
 	asctime_r(localtime_r(&now, &current_time), str);
 	strftime(str, sizeof(str), "%a, %d %b %Y %H:%M:%S GMT", &current_time);
     return str;
+}
+
+void HTTPResponse::HandleError(int statusCode)
+{
+    Clear();
+    status_code_ = statusCode;
+    body_ = GenerateHTML(statusCode);
+}
+
+std::string HTTPResponse::GenerateHTML(int statusCode) const
+{
+    std::stringstream ss;
+
+    std::string status_msg = this->STATUS_MSG.find(statusCode)->second;
+    ss << "<html>" << "\r\n"
+       << "<head><title>" << statusCode << " " << status_msg << "</title></head>" << "\r\n"
+       << "<body>" << "\r\n"
+       << "<center><h1>" << statusCode << " " << status_msg << "</h1></center>" << "\r\n"
+       << "<hr><center>webserv</center>" << "\r\n"
+       << "</body>" << "\r\n"
+       << "</html>" << "\r\n";
+    return ss.str();
 }
 
 std::map<int, std::string> HTTPResponse::SetStatusMsg()
