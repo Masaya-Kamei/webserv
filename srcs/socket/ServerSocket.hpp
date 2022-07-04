@@ -18,8 +18,14 @@ class ServerSocket : public ASocket
 		explicit ServerSocket(const int fd);
 		~ServerSocket();
 
-		std::string	RecvData(const ssize_t size = 1048576) const;
-		void		SendData(const std::string& msg) const;
+		std::string		RecvRequest() const;
+		std::string		RecvData() const;
+		void			SendResponse(const std::string& response_msg) const;
+		void			DisconnectSocket(void);
+		e_status		GetSocketStatus(void) const;
+
+	private:
+		e_status		socket_status_;
 };
 
 #endif  // SERVERSOCKET_HPP
