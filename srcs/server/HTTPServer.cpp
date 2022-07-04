@@ -47,28 +47,44 @@ void	HTTPServer::MainLoop(EventQueue const & equeue) const
 	}
 }
 
-
 void	HTTPServer::Communication(ServerSocket *ssocket) const
 {
-	(void)ssocket;
-// 	int				status_code;
-// 	HTTPRequest		req;
-// 	HTTPMethod		method;
+	HTTPRequest		req;
+	// HTTPResponse		res;
+	// std::string		send_msg;
 
-// 	try
-// 	{
-// 		req.RecvRequest(ssocket);
-// 		status_code = method.ExecHTTPMethod(req);
-// 	}
-// 	catch (const ClientClosed& e)
-// 	{
-// 		delete ssocket;
-// 		return;
-// 	}
-// 	catch (const HTTPError& e)
-// 	{
-// 		status_code = e.GetStatusCode();
-// 	}
-// 	HTTPResponse	res(status_code, req, method);
-// 	res.SendResponse(ssocket);
+	try
+	{
+		req.ParseRequest(*ssocket);
+		if (ssocket->GetSocketStatus() == ServerSocket::DISCONNECT)
+		{
+			delete ssocket;
+			return;
+		}
+		req.RequestDisplay();
+	}
+	catch (std::exception & e)
+	{
+		std::cerr << e.what() << std::endl;
+	}
+	
+	return;
+
+	/*
+	recv_msg = ssocket->RecvRequest();
+	if (recv_msg.size() == 0)
+		delete ssocket;
+	else
+	{
+		std::cout << "[recv_msg]\n" << recv_msg << std::endl;
+		ssocket->GetHTTPRequest()->ParseRequest();
+		if ( ssocket->GetHTTPRequest()->GetRequestStatus() != 0 )
+		{
+			ssocket->GetHTTPRequest()->RequestDisplay();
+			// send_msg = res.CreateResponse(req);
+			// ssocket->SendResponse(send_msg);
+			//ssocket->SendResponse(recv_msg);
+		}
+	}
+	*/
 }
