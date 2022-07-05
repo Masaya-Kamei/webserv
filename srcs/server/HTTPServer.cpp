@@ -5,6 +5,7 @@
 #include "HTTPMethod.hpp"
 #include "HTTPResponse.hpp"
 #include "HTTPError.hpp"
+#include "ClientClosed.hpp"
 
 HTTPServer::HTTPServer()
 {
@@ -59,21 +60,19 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 
 	try
 	{
-	// 	recv_msg = req.RecvRequest(ssocket);
-	// 	if (recv_msg.size() == 0)
-	// 	{
-	// 	delete ssocket;
-	// 	return;
-	// 	}
+// 		req.RecvRequest(ssocket);
 		// status_code = method.ExecHTTPMethod(req);
 		method.ExecHTTPMethod();
 	}
-	catch (std::exception &e)
+	catch (const ClientClosed& e)
 	{
-		// 	if (HTTPError ではない場合)
-		// 	throw;
-		// 	status_code = ?;
+		delete ssocket;
+		return;
 	}
-	HTTPResponse res(method);
+	catch (const HTTPError& e)
+	{
+		e.GetStatusCode();
+	}
+	HTTPResponse	res(method);
 	res.SendResponse(ssocket);
 }
