@@ -4,7 +4,6 @@
 # include <string>
 # include <map>
 # include <fstream>
-
 // # include "HTTPRequest.hpp"
 
 class HTTPMethod
@@ -31,15 +30,12 @@ class HTTPMethod
 		std::ifstream ifs_;
 
 		void ParseReq();
-
 		void HandleFile();
 		void ReadFile();
 		void AppendBody(const char *buffer);
 		// void setHeader(const std::pair<std::string, std::string> &elem);
 
-		/* response */
 		int status_code_;
-		// std::string res_msg_;
 		// std::map<std::string, std::string> headers_;
 		// size_t sent_byte_;
 		std::string body_;

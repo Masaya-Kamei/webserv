@@ -19,7 +19,6 @@ class HTTPResponse
 		void CreateResponse(HTTPMethod method);
 
 	private:
-		// static const size_t BUF_SIZE;
 		static const std::map<int, std::string> STATUS_MSG;
 		int status_code_;
 		std::string res_msg_;
@@ -27,11 +26,7 @@ class HTTPResponse
 		size_t sent_byte_;
 		std::string body_;
 		bool connection_;
-
-		std::string method_;
-		std::string path_;
 		std::string http_;
-		std::ifstream ifs_;
 
 		void SetResponse(bool connection);
 		std::string ToString();

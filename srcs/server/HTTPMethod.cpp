@@ -58,8 +58,8 @@ void HTTPMethod::ParseReq()
 {
 	method_ = "GET";
 	http_ = "HTTP/1.1";
-	// path_ = "html/index.html";
-	path_ = "html/no.html";
+	path_ = "html/index.html";
+	// path_ = "html/no.html";
 	connection_ =  true;
 }
 /* 

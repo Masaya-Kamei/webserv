@@ -13,7 +13,6 @@ HTTPResponse::HTTPResponse(const HTTPMethod &method)
 {
 	status_code_ = method.GetStatusCode();
 	http_ = method.GetHttp();
-	path_ = method.GetPath();
 	body_ = method.GetBody();
 	connection_ = method.GetConnection();
 	SetResponse(connection_);

@@ -70,7 +70,6 @@ void    HTTPServer::Communication(ServerSocket *ssocket) const
 	}
 	catch (std::exception &e)
 	{
-		std::cout << e.what() << std::endl;
 		// 	if (HTTPError ではない場合)
 		// 	throw;
 		// 	status_code = ?;
