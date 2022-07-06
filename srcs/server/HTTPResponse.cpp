@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sys/socket.h>
 #include "HTTPResponse.hpp"
+#include "HTTPRequest.hpp"
 
 const std::map<int, std::string> HTTPResponse::STATUS_MSG = SetStatusMsg();
 
@@ -9,12 +10,21 @@ HTTPResponse::HTTPResponse(): sent_byte_(0)
 {
 }
 
-HTTPResponse::HTTPResponse(const HTTPMethod &method)
+HTTPResponse::HTTPResponse(const HTTPMethod& method, int status_code, HTTPRequest req)
 {
-	status_code_ = method.GetStatusCode();
-	http_ = method.GetHttp();
-	body_ = method.GetBody();
-	connection_ = method.GetConnection();
+	status_code_ = status_code;
+	std::cout << method.GetBody().size() << std::endl;
+	if (method.GetBody().size() == 0)
+	{
+		http_ = req.GetVersion();
+		HandleError(status_code_);
+	}
+	else
+	{
+		http_ = method.GetHttp();
+		body_ = method.GetBody();
+		connection_ = method.GetConnection();
+	}
 	SetResponse(connection_);
 }
 

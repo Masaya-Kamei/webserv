@@ -13,9 +13,18 @@ class HTTPRequest
 	public:
 		HTTPRequest();
 		~HTTPRequest();
+		enum	e_method
+		{
+			GET = 0,
+			POST,
+			DELETE,
+			NONE,
+		};
 
 		void	ParseRequest(ServerSocket const & ssocket);
 		void	RequestDisplay(void) const;
+		std::string GetVersion() const;
+		e_method GetMethod() const;
 
 	private:
 		enum	e_status
@@ -25,13 +34,6 @@ class HTTPRequest
 			BODY,
 		};
 
-		enum	e_method
-		{
-			GET = 0,
-			POST,
-			DELETE,
-			NONE,
-		};
 
 		//GetLine
 		std::string		save_;

@@ -1,3 +1,4 @@
+#include <unistd.h>
 #include "HTTPMethod.hpp"
 #include "HTTPError.hpp"
 
@@ -11,24 +12,35 @@ HTTPMethod::~HTTPMethod()
 {
 }
 
-int HTTPMethod::ExecHTTPMethod()
+int HTTPMethod::ExecHTTPMethod(HTTPRequest req)
 {
-	status_code_ = 200;
-
-	ParseReq();
-	HandleFile();
+	ParseReq(req);
+	HandleFile(method_);
+	// HandleFile(req.GetMethod());
 	ReadFile();
 	return status_code_;
 }
 
-void HTTPMethod::HandleFile()
+void HTTPMethod::HandleFile(int method)
 {
-	if (method_ == "GET")
+	if (method == HTTPRequest::GET)
 	{
 		ifs_.open(path_.c_str());
 		if (!ifs_)
 		{
 			throw HTTPError(404);
+		}
+	}
+	else if (method == HTTPRequest::POST)
+	{
+		ifs_.open(path_.c_str());
+	}
+	else if (method == HTTPRequest::DELETE)
+	{
+		int ret = unlink(path_.c_str());
+		if (ret != 0)
+		{
+			throw HTTPError(500);
 		}
 	}
 }
@@ -54,12 +66,13 @@ void HTTPMethod::AppendBody(const char *buffer)
 }
 
 /* set request */
-void HTTPMethod::ParseReq()
+void HTTPMethod::ParseReq(HTTPRequest req)
 {
-	method_ = "GET";
+	http_ = req.GetVersion();
+	method_ = HTTPRequest::GET;
 	http_ = "HTTP/1.1";
-	path_ = "html/index.html";
-	// path_ = "html/no.html";
+	// path_ = "html/index.html";
+	path_ = "html/no.html";
 	connection_ =  true;
 }
 /* 

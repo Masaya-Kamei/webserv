@@ -4,7 +4,7 @@
 # include <string>
 # include <map>
 # include <fstream>
-// # include "HTTPRequest.hpp"
+# include "HTTPRequest.hpp"
 
 class HTTPMethod
 {
@@ -12,8 +12,8 @@ class HTTPMethod
 		HTTPMethod();
 		~HTTPMethod();
 
-		// int ExecHTTPMethod(HTTPRequest req);
-		int ExecHTTPMethod();
+		int ExecHTTPMethod(HTTPRequest req);
+		// int ExecHTTPMethod();
 
 		int GetStatusCode() const;
 		std::string GetPath() const;
@@ -26,20 +26,19 @@ class HTTPMethod
 		std::map<std::string, std::string> rq_;
 		std::string path_;
 		std::string http_;
-		std::string method_;
 		std::ifstream ifs_;
-
-		void ParseReq();
-		void HandleFile();
-		void ReadFile();
-		void AppendBody(const char *buffer);
-		// void setHeader(const std::pair<std::string, std::string> &elem);
-
 		int status_code_;
 		// std::map<std::string, std::string> headers_;
 		// size_t sent_byte_;
 		std::string body_;
 		bool connection_;
+		int method_;
+		
+		void ParseReq(HTTPRequest req);
+		void HandleFile(int method);
+		void ReadFile();
+		void AppendBody(const char *buffer);
+		// void setHeader(const std::pair<std::string, std::string> &elem);
 };
 
 #endif  // HTTPMETHOD_HPP

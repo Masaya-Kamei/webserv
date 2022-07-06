@@ -192,3 +192,13 @@ void	HTTPRequest::RequestDisplay(void) const
 
 	return ;
 }
+
+std::string HTTPRequest::GetVersion() const
+{
+	return version_;
+}
+
+HTTPRequest::e_method HTTPRequest::GetMethod() const
+{
+	return method_;
+}

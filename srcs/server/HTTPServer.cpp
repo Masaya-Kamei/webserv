@@ -55,16 +55,14 @@ void	HTTPServer::MainLoop(EventQueue const & equeue) const
 void	HTTPServer::Communication(ServerSocket *ssocket) const
 {
 	HTTPRequest		req;
-	// int				status_code;
-	HTTPRequest		req;
+	int				status_code;
 	HTTPMethod		method;
 
 	try
 	{
-		req.RecvRequest(*ssocket);
-		req.RequestDisplay();
-		// status_code = method.ExecHTTPMethod(req);
-		method.ExecHTTPMethod();
+		// req.RecvRequest(*ssocket);
+		// req.RequestDisplay();
+		status_code = method.ExecHTTPMethod(req);
 	}
 	catch (const ClientClosed& e)
 	{
@@ -73,8 +71,37 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 	}
 	catch (const HTTPError& e)
 	{
-		std::cerr << "status code : " << e.GetStatusCode() << std::endl;
+		status_code = e.GetStatusCode();
+	}
+	HTTPResponse	res(method, status_code, req);
+	res.SendResponse(ssocket);
+}
+
+/* 
+catch内でerrorResを送り、returnしてしまうパターン
+	catch (const HTTPError& e)
+	{
+		status_code = e.GetStatusCode();
+		HTTPResponse res(e.GetStatusCode(), req);
+		res.SendErrorResponse(ssocket);
+		return;
 	}
 	HTTPResponse	res(method);
 	res.SendResponse(ssocket);
-}
+ */
+
+/*
+フラグを持って入るパターン 
+	catch (const HTTPError& e)
+	{
+		status_code = e.GetStatusCode();
+		flag = true;
+	}
+	HTTPResponse	res(method, status_code, req, flag);
+	res.SendResponse(ssocket);
+ */
+
+/* 
+変更なしでmethodのbody.size()でハンドリングするパターン
+ */
+

@@ -7,16 +7,16 @@
 # include <fstream>
 # include "ServerSocket.hpp"
 # include "HTTPMethod.hpp"
+# include "HTTPRequest.hpp"
 
 class HTTPResponse
 {
 	public:
 		HTTPResponse();
-		explicit HTTPResponse(const HTTPMethod &method);
+		HTTPResponse(const HTTPMethod &method, int status_code, HTTPRequest req);
 		~HTTPResponse();
 
 		void SendResponse(ServerSocket *ssocket);
-		void CreateResponse(HTTPMethod method);
 
 	private:
 		static const std::map<int, std::string> STATUS_MSG;
@@ -37,6 +37,7 @@ class HTTPResponse
 		void Clear();
 		void HandleError(int status_code);
 		std::string GenerateHTML(int status_code) const;
+		void CheckStatusCode(int status_code);
 };
 
 #endif  // HTTPRESPONSE_HPP
