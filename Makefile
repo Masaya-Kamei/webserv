@@ -1,7 +1,7 @@
 vpath	%.cpp	srcs: \
 				srcs/server: \
-				srcs/socket
-
+				srcs/socket: \
+				srcs/config
 SRCS	=	main.cpp \
 			HTTPServer.cpp \
 			EventQueue.cpp \
@@ -11,15 +11,20 @@ SRCS	=	main.cpp \
 			HTTPResponse.cpp \
 			HTTPMethod.cpp \
 			HTTPRequest.cpp
+			Config.cpp \
+			LocationDirective.cpp \
+			ServerDirective.cpp \
+			Tokens.cpp
 
 OBJSDIR	=	./objs
 OBJS	=	$(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))
 DEPS    =	$(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.d))
 
-INCLUDE =	-I ./srcs/server \
-			-I ./srcs/utils \
+INCLUDE =	-I srcs/server \
+			-I srcs/utils \
 			-I srcs/socket \
-			-I srcs/exception
+			-I srcs/exception \
+			-I srcs/config
 NAME	=	webserv
 
 CC		=	c++
