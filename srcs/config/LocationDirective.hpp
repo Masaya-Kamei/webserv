@@ -9,7 +9,8 @@
 class LocationDirective
 {
 	public:
-		LocationDirective(const std::string& path, Tokens::citr begin, Tokens::citr end);
+		LocationDirective();
+		LocationDirective(const std::string &path, Tokens::citr begin, Tokens::citr end);
 		~LocationDirective();
 
 		// Getter

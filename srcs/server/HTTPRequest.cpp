@@ -10,6 +10,15 @@ HTTPRequest::~HTTPRequest()
 {
 }
 
+HTTPRequest::HTTPRequest(e_method method)
+{
+	method_ = method;
+	version_ = "HTTP/1.1";
+	target_ = "html/index.html";
+	// target_ = "html/no.html";
+	host_ = "127.0.0.1:8080";
+}
+
 static std::vector<std::string>	my_split(std::string const & str, std::string const & separator)
 {
 	std::vector<std::string>	list;
@@ -201,4 +210,14 @@ std::string HTTPRequest::GetVersion() const
 HTTPRequest::e_method HTTPRequest::GetMethod() const
 {
 	return method_;
+}
+
+std::string HTTPRequest::GetHost() const
+{
+	return host_;
+}
+
+std::string HTTPRequest::GetTarget() const
+{
+	return target_;
 }

@@ -12,9 +12,15 @@ SRCS	=	HTTPServer.cpp \
 			Config.cpp \
 			Tokens.cpp \
 			LocationDirective.cpp \
-			ServerDirective.cpp
-SRCS	+=	listensocket_test.cpp \
-			conf_test.cpp
+			ServerDirective.cpp \
+			HTTPRequest.cpp \
+			HTTPResponse.cpp \
+			HTTPMethod.cpp \
+			URI.cpp
+# SRCS	+=	listensocket_test.cpp \
+# 			conf_test.cpp
+SRCS	+=	uri_test.cpp
+
 
 OBJSDIR	=	./objs
 OBJS	=	$(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))

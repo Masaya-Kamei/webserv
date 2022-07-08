@@ -10,6 +10,7 @@
 class ServerDirective
 {
 	public:
+		ServerDirective();
 		ServerDirective(Tokens::citr begin, Tokens::citr end);
 		~ServerDirective();
 

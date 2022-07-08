@@ -5,6 +5,8 @@
 # include <map>
 # include <fstream>
 # include "HTTPRequest.hpp"
+# include "URI.hpp"
+# include "ServerDirective.hpp"
 
 class HTTPMethod
 {
@@ -12,19 +14,25 @@ class HTTPMethod
 		HTTPMethod();
 		~HTTPMethod();
 
-		int ExecHTTPMethod(HTTPRequest req);
+		int ExecHTTPMethod(HTTPRequest req, std::vector<ServerDirective> servers);
 		// int ExecHTTPMethod();
 
 		int GetStatusCode() const;
-		std::string GetPath() const;
+		std::string GetUri() const;
 		std::string GetHttp() const;
 		std::string GetBody() const;
 		bool GetConnection() const;
+		HTTPRequest::e_method GetMethod();
+
+		void ParseReq(HTTPRequest req, std::vector<ServerDirective>servers, ServerDirective *server);
+		void FindServer(HTTPRequest req, std::vector<ServerDirective> servers, ServerDirective *server);
+		bool ServerMatch(const std::pair<unsigned int, int> &listen, const std::string host);
+		void SeparateHost(const std::string &host, std::string *host_ip, std::string *port);
 
 	private:
 		static const size_t BUF_SIZE;
-		std::map<std::string, std::string> rq_;
-		std::string path_;
+		// ServerDirective server_;
+		std::string uri_;
 		std::string http_;
 		std::ifstream ifs_;
 		int status_code_;
@@ -32,9 +40,8 @@ class HTTPMethod
 		// size_t sent_byte_;
 		std::string body_;
 		bool connection_;
-		int method_;
-		
-		void ParseReq(HTTPRequest req);
+		HTTPRequest::e_method method_;
+
 		void HandleFile(int method);
 		void ReadFile();
 		void AppendBody(const char *buffer);

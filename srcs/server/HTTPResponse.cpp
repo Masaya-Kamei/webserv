@@ -13,8 +13,7 @@ HTTPResponse::HTTPResponse(): sent_byte_(0)
 HTTPResponse::HTTPResponse(const HTTPMethod& method, int status_code, HTTPRequest req)
 {
 	status_code_ = status_code;
-	std::cout << method.GetBody().size() << std::endl;
-	if (method.GetBody().size() == 0)
+	if (status_code_ >= 400)
 	{
 		http_ = req.GetVersion();
 		HandleError(status_code_);
