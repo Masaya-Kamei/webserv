@@ -1,81 +1,14 @@
-SRCSDIR	= ../../srcs
-vpath	%.cpp	testsrcs: \
-				$(SRCSDIR): \
-				$(SRCSDIR)/server: \
-				$(SRCSDIR)/socket: \
-				$(SRCSDIR)/config
-SRCS	=	HTTPServer.cpp \
-			ListenSocket.cpp \
-			ServerSocket.cpp \
-			ASocket.cpp \
-			EventQueue.cpp \
-			Config.cpp \
-			Tokens.cpp \
-			LocationDirective.cpp \
-			ServerDirective.cpp \
-			HTTPRequest.cpp \
-			HTTPResponse.cpp \
-			HTTPMethod.cpp \
-			URI.cpp
-# SRCS	+=	listensocket_test.cpp \
-# 			conf_test.cpp
-SRCS	+=	uri_test.cpp
+all			:	test
 
+test		:	config nl utils
 
-OBJSDIR	=	./objs
-OBJS	=	$(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.o))
-DEPS    =	$(addprefix $(OBJSDIR)/, $(SRCS:.cpp=.d))
+config:
+	make test -C config_test
 
-INCLUDE =	-I $(SRCSDIR)/server \
-			-I $(SRCSDIR)/socket \
-			-I $(SRCSDIR)/utils \
-			-I$(SRCSDIR)/config \
-			-I$(SRCSDIR)/exception
-NAME	=	unit_test
+utils:
+	make test -C utils_test
 
-CC		=	c++
-CFLAGS	=	-Wall -Wextra -Werror
-CFLAGS	+=	-MMD -MP
-CFLAGS	+=	-std=c++11
-LINK	=	-lgtest -lgtest_main
-RM		=	rm -rf
+nl:
+	@echo
 
-all			:	$(NAME)
-
-$(NAME)		:	$(OBJS)
-				$(CC) $(CFLAGS) $(LINK) $(INCLUDE) -o $@ $(OBJS)
-
-$(OBJSDIR)/%.o	:	%.cpp
-			@mkdir -p $(dir $@)
-			$(CC) $(CFLAGS) $(INCLUDE) -o $@ -c $<
-
--include $(DEPS)
-
-test		:	all
-				@echo
-				@./$(NAME) || :
-
-clean		:
-				-$(RM) $(OBJS) $(DEPS)
-
-fclean		:	clean
-				-$(RM) $(NAME)
-
-re			:	fclean all
-
-print		:	CFLAGS	+= -D PRINT_FLAG
-print		:	re
-
-debug		:	CFLAGS	+=	-g
-debug		:	re
-
-address		:	CFLAGS	+=	-g -fsanitize=address
-address		:	re
-
-ifeq ($(shell uname),Darwin)
-leak		:	CC		=	/usr/local/opt/llvm/bin/clang++
-endif
-leak		:	CFLAGS	+=	-g -fsanitize=leak
-leak		:	re
-
-.PHONY		:	all clean fclean re debug address leak test
+.PHONY		:	all test config utils nl

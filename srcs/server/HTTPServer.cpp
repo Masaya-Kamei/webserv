@@ -17,8 +17,9 @@ HTTPServer::~HTTPServer()
 {
 }
 
-void	HTTPServer::Start() const
+void	HTTPServer::Start(const Config& config) const
 {
+	(void)config;
 	ListenSocket	*lsocket = new ListenSocket();
 	EventQueue		equeue;
 
@@ -77,3 +78,7 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 	HTTPResponse	res(method, status_code, req);
 	res.SendResponse(ssocket);
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> config
