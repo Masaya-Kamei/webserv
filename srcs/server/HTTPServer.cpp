@@ -2,15 +2,12 @@
 #include "HTTPServer.hpp"
 #include "ListenSocket.hpp"
 #include "debug.hpp"
-<<<<<<< HEAD
 #include "HTTPMethod.hpp"
 #include "HTTPResponse.hpp"
 #include "HTTPError.hpp"
 #include "ClientClosed.hpp"
 #include "HTTPRequest.hpp"
-=======
 #include "Config.hpp"
->>>>>>> origin/config
 
 HTTPServer::HTTPServer()
 {
@@ -81,32 +78,4 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 	HTTPResponse	res(method, status_code, req);
 	res.SendResponse(ssocket);
 }
-
-/* 
-catch内でerrorResを送り、returnしてしまうパターン
-	catch (const HTTPError& e)
-	{
-		status_code = e.GetStatusCode();
-		HTTPResponse res(e.GetStatusCode(), req);
-		res.SendErrorResponse(ssocket);
-		return;
-	}
-	HTTPResponse	res(method);
-	res.SendResponse(ssocket);
- */
-
-/*
-フラグを持って入るパターン 
-	catch (const HTTPError& e)
-	{
-		status_code = e.GetStatusCode();
-		flag = true;
-	}
-	HTTPResponse	res(method, status_code, req, flag);
-	res.SendResponse(ssocket);
- */
-
-/* 
-変更なしでmethodのbody.size()でハンドリングするパターン
- */
 
