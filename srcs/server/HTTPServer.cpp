@@ -62,29 +62,6 @@ void	HTTPServer::MainLoop(EventQueue const & equeue) const
 
 void	HTTPServer::Communication(ServerSocket *ssocket) const
 {
-<<<<<<< HEAD
-	HTTPRequest		req;
-	int				status_code;
-	HTTPMethod		method;
-	Config			config("conf/simple2.conf");
-	try
-	{
-		// req.RecvRequest(*ssocket);
-		// req.RequestDisplay();
-		status_code = method.ExecHTTPMethod(req, ssocket);
-	}
-	catch (const ClientClosed& e)
-	{
-		delete ssocket;
-		return;
-	}
-	catch (const HTTPError& e)
-	{
-		status_code = e.GetStatusCode();
-	}
-	HTTPResponse	res(method, status_code, req);
-	res.SendResponse(ssocket);
-=======
 	(void)ssocket;
 	// int				status_code;
 	// HTTPRequest		req;
@@ -107,9 +84,4 @@ void	HTTPServer::Communication(ServerSocket *ssocket) const
 	// }
 	// HTTPResponse	res(status_code, req, method, server_conf);
 	// res.SendResponse(ssocket);
->>>>>>> config
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> config
