@@ -1,10 +1,6 @@
 #include <arpa/inet.h>
 #include "ServerDirective.hpp"
 
-ServerDirective::ServerDirective()
-{
-}
-
 ServerDirective::ServerDirective(Tokens::citr begin, Tokens::citr end)
 {
 	const std::pair<std::string, ParseFunc> p[] = {

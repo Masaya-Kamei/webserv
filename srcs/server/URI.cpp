@@ -34,44 +34,43 @@ void URI::CreatePath()
 {
 	std::string path = raw_path_;
 	const std::vector<LocationDirective> locations = server_.GetLocations();
-	// sort(locations.rbegin(), locations.rend());
 	std::vector<LocationDirective>::const_iterator ite = locations.begin();
-	LocationDirective location;
-
 	for (; ite != locations.end(); ite++)
 	{
-		// longest_match
-		if (!location_match(ite->GetPath(), path))
+		const std::string location_path = ite->GetPath() + ite->GetRoot();
+		// longest_match(location + root)
+		if (!location_match(location_path, path))
 		{
 			continue;
 		}
-		location = *ite;
-		FindPathLocation(&path, location);
-		break;
+		// indexの中からFILEを見つける
+		if (FindPathLocation(&path, *ite))
+		{
+			break;
+		}
 	}
 }
 
-bool URI::location_match(const std::string &location_path, std::string path)
+bool URI::location_match(const std::string& location_path, std::string path)
 {
-	std::cout << "location_path: " << location_path << std::endl;
-	std::cout << "path: " << path << std::endl;
 	return path.size() >= location_path.size()
 			&& !path.compare(0, location_path.size(), location_path);
 }
 
-void URI::FindPathLocation(std::string *path, LocationDirective location)
+void URI::FindPathLocation(std::string *path, cosnt LocationDirective& location)
 {
 	const std::vector<std::string> allowed_methods = location.GetAllowedMethods();
 	const std::vector<std::string> index = location.GetIndex();
-	const std::string redirect = "REDIRECT";
+	// const std::string redirect = "REDIRECT";
 	std::vector<std::string>::iterator ite;
 
 	std::cout << "method" << method_ << std::endl;
-	if (std::find(allowed_methods.begin(), allowed_methods.end(), redirect) != allowed_methods.end())
-	{
-		uri_type_ = REDIRECT;
-		return;
-	}
+	// if (std::find(allowed_methods.begin(),
+		// allowed_methods.end(), redirect) != allowed_methods.end())
+	// {
+	// 	uri_type_ = REDIRECT;
+	// 	return;
+	// }
 	if (path.at(path.size() - 1) == '/' && method_ == HTTPRequest::GET)
 	{
 		FindFileIndex(location, index, path);
@@ -86,6 +85,7 @@ void URI::FindPathLocation(std::string *path, LocationDirective location)
 		}
 		throw HTTPError(403);
 	}
+	struct stat stat;
 }
 
 void URI::FindFileIndex(LocationDirective location,
@@ -101,34 +101,35 @@ void URI::FindFileIndex(LocationDirective location,
 		}
 		if (IsRegularFile(path_stat))
 		{
-			if (HasExtension(join_path))
-			{
-				uri_type_ = CGI;
-			}
-			else
-			{
-				uri_type_ = FILE;
-			}
+			// if (HasExtension(join_path))
+			// {
+			// 	uri_type_ = CGI;
+			// }
+			// else
+			// {
+			// }
+			uri_type_ = FILE;
 			*path = join_path;
 			return;
 		}
 	}
-	if (!AllowAutoIndex(location, *path))
-	{
-		throw HTTPError(404);
-	}
-	uri_type_ = AUTOINDEX;
+	// if (!AllowAutoIndex(location, *path))
+	// {
+	// 	throw HTTPError(404);
+	// }
+	// uri_type_ = AUTOINDEX;
 }
 
-bool URI::HasExtension(std::string path)
-{
-	if (path.rfind(".") == std::string::npos)
-	{
-		return false;
-	}
-	return true;
-}
+// bool URI::HasExtension(std::string path)
+// {
+// 	if (path.rfind(".") == std::string::npos)
+// 	{
+// 		return false;
+// 	}
+// 	return true;
+// }
 
+/* 
 bool URI::AllowAutoIndex(LocationDirective location, std::string path) const
 {
 	if (!location.GetAutoIndex())
@@ -142,6 +143,7 @@ bool URI::AllowAutoIndex(LocationDirective location, std::string path) const
 	}
 	return IsDirectory(path_stat);
 }
+ */
 
 bool URI::IsRegularFile(const struct stat &path_stat) const
 {

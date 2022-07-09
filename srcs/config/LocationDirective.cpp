@@ -1,10 +1,6 @@
 #include <map>
 #include "LocationDirective.hpp"
 
-LocationDirective::LocationDirective()
-{
-}
-
 LocationDirective::LocationDirective(const std::string& path, Tokens::citr begin, Tokens::citr end)
 	: path_(path)
 {

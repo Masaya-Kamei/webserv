@@ -26,9 +26,9 @@ void HTTPMethod::ParseReq(HTTPRequest req,
 	uri_ = req.GetTarget();
 	connection_ =  true;
 
-	FindServer(req, servers, server);
+	// FindServer(req, servers, server);
 }
-
+/* 
 void HTTPMethod::FindServer(HTTPRequest req,
 								std::vector<ServerDirective> servers, ServerDirective *server)
 {
@@ -68,6 +68,7 @@ void HTTPMethod::SeparateHost(const std::string &host, std::string *host_ip, std
 	*host_ip = host.substr(0, port_pos);
 	*port = host.substr(port_pos + 1);
 }
+ */
 
 /* 
 void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
@@ -75,12 +76,9 @@ void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
     headers_.insert(elem);
 } */
 
-int HTTPMethod::ExecHTTPMethod(HTTPRequest req, std::vector<ServerDirective> servers)
+int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &servers)
 {
-	ServerDirective server;
-
-	ParseReq(req, servers, &server);
-
+	ParseReq(req);
 	URI uri(uri_, server, method_);
 
 	switch (uri.GetType())
