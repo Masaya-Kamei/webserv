@@ -14,8 +14,7 @@ class HTTPMethod
 		HTTPMethod();
 		~HTTPMethod();
 
-		int ExecHTTPMethod(HTTPRequest req, std::vector<ServerDirective> servers);
-		// int ExecHTTPMethod();
+		int ExecHTTPMethod(HTTPRequest req, const ServerDirective &server);
 
 		int GetStatusCode() const;
 		std::string GetUri() const;
@@ -24,11 +23,7 @@ class HTTPMethod
 		bool GetConnection() const;
 		HTTPRequest::e_method GetMethod();
 
-		void ParseReq(HTTPRequest req, std::vector<ServerDirective>servers, ServerDirective *server);
-		void FindServer(HTTPRequest req, std::vector<ServerDirective> servers, ServerDirective *server);
-		bool ServerMatch(const std::pair<unsigned int, int> &listen, const std::string host);
-		void SeparateHost(const std::string &host, std::string *host_ip, std::string *port);
-
+		void ParseReq(HTTPRequest req);
 	private:
 		static const size_t BUF_SIZE;
 		// ServerDirective server_;

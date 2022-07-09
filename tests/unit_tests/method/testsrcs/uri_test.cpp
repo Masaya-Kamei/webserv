@@ -2,7 +2,7 @@
 #include "Config.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPMethod.hpp"
-// #include "URI.hpp"
+
 /* 
 TEST(Uritest, Location)
 {
@@ -20,38 +20,21 @@ TEST(Uritest, Location)
 }
  */
 
-TEST(MethodTest, FindServer)
-{
-	Config config("conf/simple.conf");
-	std::vector<ServerDirective> servers = config.GetServers();
-	HTTPRequest req(HTTPRequest::GET);
-	HTTPMethod method;
-	ServerDirective server;
-
-	std::cout << "servers.size: " << servers.size() << std::endl;
-	method.ParseReq(req, servers, &server);
-	std::vector<LocationDirective> locations = server.GetLocations();
-	std::cout << "locations.size: " << locations.size() << std::endl;
-	for (size_t i = 0; i < locations.size(); i++)
-		std::cout << locations[i].GetPath() << std::endl;
-}
-
-
 TEST(UriTest, UriGetType)
 {
-	Config config("conf/simple.conf");
+	Config config("conf/simple2.conf");
 	std::vector<ServerDirective> servers = config.GetServers();
 	HTTPRequest req(HTTPRequest::GET);
 	HTTPMethod method;
-	ServerDirective server;
 
-	method.ParseReq(req, servers, &server);
+	method.ParseReq(req);
 
-	URI uri(method.GetUri(), server, method.GetMethod());
+	std::cout << "Uri: " << method.GetUri() << std::endl;
+	std::cout << "method: " << method.GetMethod() << std::endl;
+	URI uri(method.GetUri(), servers.at(0), method.GetMethod());
 
 	std::cout << uri.GetType() << std::endl;
 	std::cout << uri.GetRawPath() << std::endl;
 	std::cout << uri.GetPath() << std::endl;
 	std::cout << uri.GetQuery() << std::endl;
-
 }

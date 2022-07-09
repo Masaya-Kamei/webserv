@@ -1,5 +1,4 @@
 #include <unistd.h>
-#include <arpa/inet.h>
 #include "HTTPMethod.hpp"
 #include "HTTPError.hpp"
 #include "URI.hpp"
@@ -15,8 +14,7 @@ HTTPMethod::~HTTPMethod()
 }
 
 /* parse request */
-void HTTPMethod::ParseReq(HTTPRequest req,
-							std::vector<ServerDirective> servers, ServerDirective *server)
+void HTTPMethod::ParseReq(HTTPRequest req)
 {
 	// http_ = "HTTP/1.1";
 	// uri_ = "html/index.html";
@@ -25,50 +23,7 @@ void HTTPMethod::ParseReq(HTTPRequest req,
 	method_ = req.GetMethod();
 	uri_ = req.GetTarget();
 	connection_ =  true;
-
-	// FindServer(req, servers, server);
 }
-/* 
-void HTTPMethod::FindServer(HTTPRequest req,
-								std::vector<ServerDirective> servers, ServerDirective *server)
-{
-	std::vector<ServerDirective>::const_iterator ite = servers.begin();
-	for (; ite != servers.end(); ite++)
-	{
-		if (ServerMatch(ite->GetListen(), req.GetHost()))
-		{
-			*server = *ite;
-			return;
-		}
-	}
-}
-
-bool HTTPMethod::ServerMatch(const std::pair<unsigned int, int> &listen, const std::string host)
-{
-	std::string host_ip;
-	std::string port;
-
-	SeparateHost(host, &host_ip, &port);
-	if (listen.first == inet_addr(host_ip.c_str()))
-	{
-		return true;
-	}
-	return false;
-}
-
-void HTTPMethod::SeparateHost(const std::string &host, std::string *host_ip, std::string *port)
-{
-	size_t port_pos = host.find(":");
-	if (port_pos == std::string::npos)
-	{
-		*host_ip = host;
-		*port = "";
-		return;
-	}
-	*host_ip = host.substr(0, port_pos);
-	*port = host.substr(port_pos + 1);
-}
- */
 
 /* 
 void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
@@ -76,7 +31,7 @@ void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
     headers_.insert(elem);
 } */
 
-int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &servers)
+int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 {
 	ParseReq(req);
 	URI uri(uri_, server, method_);

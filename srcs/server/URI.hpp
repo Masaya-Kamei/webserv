@@ -39,14 +39,13 @@ class URI
 		void SeparateRawUri();
 		void CreatePath();
 		bool location_match(const std::string &location_path, std::string path);
-		void FindPathLocation(std::string *path, LocationDirective location);
-		void FindFileIndex(LocationDirective location,
+		void FindPathLocation(std::string *path, const LocationDirective &location);
+		void FindFileIndex(const LocationDirective &location,
 							const std::vector<std::string> index, std::string *path);
-		bool AllowAutoIndex(LocationDirective location, std::string path) const;
+		bool AllowAutoIndex(const LocationDirective &location, std::string *path) const;
 		bool IsRegularFile(const struct stat &path_stat) const;
 		bool IsDirectory(const struct stat &path_stat) const;
-		void SeparateHost(std::string host, std::string *host_ip, std::string *port);
-		bool HasExtension(std::string path);
+		// bool HasExtension(std::string path);
 };
 
 #endif  // URI_HPP
