@@ -29,10 +29,11 @@ TEST(UriTest, UriGetType)
 
 	method.ParseReq(req);
 
-	std::cout << "Uri: " << method.GetUri() << std::endl;
-	std::cout << "method: " << method.GetMethod() << std::endl;
+	std::cout << "req_Uri: " << method.GetUri() << std::endl;
+	std::cout << "req_method: " << method.GetMethod() << std::endl;
 	URI uri(method.GetUri(), servers.at(0), method.GetMethod());
 
+	std::cout << "\n~ URI_INFO ~" << std::endl;
 	std::cout << uri.GetType() << std::endl;
 	std::cout << uri.GetRawPath() << std::endl;
 	std::cout << uri.GetPath() << std::endl;

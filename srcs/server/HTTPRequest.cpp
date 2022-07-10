@@ -14,8 +14,11 @@ HTTPRequest::HTTPRequest(e_method method)
 {
 	method_ = method;
 	version_ = "HTTP/1.1";
+	// target_ = "/";
 	target_ = "/sub1/html1/index2.html";
-	// target_ = "html/no.html";
+	// target_ = "/sub1/";
+	// target_ = "/sub1/html1/";
+	// target_ = "/html/no.html";
 }
 
 static std::vector<std::string>	my_split(std::string const & str, std::string const & separator)

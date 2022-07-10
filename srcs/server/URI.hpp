@@ -26,10 +26,9 @@ class URI
 		std::string GetQuery() const;
 
 	private:
-		const ServerDirective server_;
+		const ServerDirective &server_;
 		const std::string &raw_uri_;
 		const int &method_;
-		// LocationDirective location_;
 		std::string raw_path_;
 		std::string path_;
 		std::string query_;
@@ -37,15 +36,13 @@ class URI
 		// struct stat stat_;
 
 		void SeparateRawUri();
-		void CreatePath();
+		void FindPath();
 		bool location_match(const std::string &location_path, std::string path);
-		void FindPathLocation(std::string *path, const LocationDirective &location);
-		void FindFileIndex(const LocationDirective &location,
-							const std::vector<std::string> index, std::string *path);
+		void FindFile(std::string *path, const LocationDirective &location);
+		void FindFileIndex(const LocationDirective &location, std::string *path);
 		bool AllowAutoIndex(const LocationDirective &location, std::string *path) const;
 		bool IsRegularFile(const struct stat &path_stat) const;
 		bool IsDirectory(const struct stat &path_stat) const;
-		// bool HasExtension(std::string path);
 };
 
 #endif  // URI_HPP
