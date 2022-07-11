@@ -13,25 +13,18 @@ HTTPMethod::~HTTPMethod()
 {
 }
 
-/* parse request */
 void HTTPMethod::ParseReq(HTTPRequest req)
 {
 	http_ = req.GetVersion();
 	method_ = req.GetMethod();
-	// uri_ = req.GetTarget();
-	connection_ =  true;
+	target_ = req.GetTarget();
+	connection_ = true;
 }
-
-/* 
-void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
-{
-    headers_.insert(elem);
-} */
 
 int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 {
 	ParseReq(req);
-	const URI uri(req.GetTarget(), server, method_);
+	const URI uri(target_, server, method_);
 
 	switch (uri.GetType())
 	{
@@ -49,24 +42,20 @@ int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 
 void HTTPMethod::HandleFile(int method_, const URI &uri)
 {
-	if (method_ == HTTPRequest::GET)
-	{
-		ifs_.open(uri.GetPath().c_str());
-		if (!ifs_)
-		{
-			throw HTTPError(404);
-		}
-	}
-	else if (method_ == HTTPRequest::POST)
-	{
-		ifs_.open(uri.GetPath().c_str());
-	}
-	else if (method_ == HTTPRequest::DELETE)
+	if (method_ == HTTPRequest::DELETE)
 	{
 		int ret = unlink(uri.GetPath().c_str());
 		if (ret != 0)
 		{
 			throw HTTPError(500);
+		}
+	}
+	else
+	{
+		ifs_.open(uri.GetPath().c_str());
+		if (!ifs_)
+		{
+			throw HTTPError(404);
 		}
 	}
 }
@@ -91,16 +80,10 @@ void HTTPMethod::AppendBody(const char *buffer)
 	body_.append(buffer);
 }
 
-
 int HTTPMethod::GetStatusCode() const
 {
 	return status_code_;
 }
-
-// std::string HTTPMethod::GetUri() const
-// {
-// 	return uri_;
-// }
 
 std::string HTTPMethod::GetHttp() const
 {

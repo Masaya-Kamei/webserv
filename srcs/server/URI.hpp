@@ -20,10 +20,11 @@ class URI
 		URI(const std::string &uri, const ServerDirective &server, const int &method);
 		~URI();
 
-		Type GetType() const;
 		std::string GetRawPath() const;
 		std::string GetPath() const;
 		std::string GetQuery() const;
+		Type GetType() const;
+		struct stat GetStat() const;
 
 	private:
 		const ServerDirective &server_;
@@ -38,7 +39,7 @@ class URI
 		void SeparateRawUri();
 		void FindPath();
 		bool location_match(const std::string &location_path, std::string path);
-		void FindFile(std::string *path, const LocationDirective &location);
+		void FindFile(const LocationDirective &location, std::string *path);
 		void FindFileIndex(const LocationDirective &location, std::string *path);
 		bool AllowAutoIndex(const LocationDirective &location, std::string *path) const;
 		bool IsRegularFile(const struct stat &path_stat) const;

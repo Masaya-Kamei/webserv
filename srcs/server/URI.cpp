@@ -27,7 +27,6 @@ void URI::SeparateRawUri()
 	}
 	raw_path_ = raw_uri_.substr(0, query_pos);
 	query_ = raw_uri_.substr(query_pos + 1);
-	// ParseQuery();
 }
 
 void URI::FindPath()
@@ -39,16 +38,12 @@ void URI::FindPath()
 
 	for (; ite != locations.end(); ite++)
 	{
-		if (!location_match(ite->GetPath(), path))
-		{
-			continue;
-		}
-		if (ite->GetPath().size() >= longest_ite->GetPath().size())
+		if (location_match(ite->GetPath(), path) && ite->GetPath().size() >= longest_ite->GetPath().size())
 		{
 			longest_ite = ite;
 		}
 	}
-	FindFile(&path, *longest_ite);
+	FindFile(*longest_ite, &path);
 	path_ = path;
 }
 
@@ -58,46 +53,19 @@ bool URI::location_match(const std::string& location_path, std::string path)
 		&& !path.compare(0, location_path.size(), location_path);
 }
 
-void URI::FindFile(std::string *path, const LocationDirective &location)
+void URI::FindFile(const LocationDirective &location, std::string *path)
 {
-	if (location.GetReturn().second.size())
+	if (method_ == HTTPRequest::GET && *path == location.GetPath() && location.GetAutoIndex())
+	{
+		uri_type_ = AUTOINDEX;
+		return;
+	}
+	if (location.GetReturn().second.size() != 0)
 	{
 		uri_type_ = REDIRECT;
 		return;
 	}
-	if (path->at(path->size() - 1) == '/' && method_ == HTTPRequest::GET)
-		{
-			FindFileIndex(location, path);
-			return;
-		}
-	*path = path->substr(1, path->size());
-	struct stat path_stat;
-
-	if (stat((*path).c_str(), &path_stat) < 0)
-    {
-		throw HTTPError(404);
-	}
-    if (IsRegularFile(path_stat))
-    {
-		uri_type_ = FILE;
-		stat_ = path_stat;
-		return;
-	}
-    if (!AllowAutoIndex(location, path))
-    {
-        if (method_ == HTTPRequest::GET)
-        {
-            throw HTTPError(404);
-        }
-        else
-        {
-            uri_type_ = FILE;
-			stat_ = path_stat;
-			return;
-		}
-    }
-	uri_type_ = AUTOINDEX;
-	stat_ = path_stat;
+	FindFileIndex(location, path);
 }
 
 void URI::FindFileIndex(const LocationDirective &location, std::string *path)
@@ -107,17 +75,23 @@ void URI::FindFileIndex(const LocationDirective &location, std::string *path)
 
 	for (size_t i = 0; i < index.size(); i++)
 	{
-		std::string join_path = location.GetPath() + "/" + location.GetRoot();
-		join_path = join_path.substr(1, join_path.size());
-		join_path += "/" + index.at(i);
-		if (stat(join_path.c_str(), &path_stat) < 0)
+		std::string current_path = location.GetPath() + "/" + location.GetRoot();
+		current_path = current_path.substr(1, current_path.size()) + "/" + index.at(i);
+		if (stat(current_path.c_str(), &path_stat) == 0 && IsRegularFile(path_stat))
 		{
-			continue;
+			uri_type_ = FILE;
+			*path = current_path;
+			stat_ = path_stat;
+			return;
 		}
+	}
+
+	*path = path->substr(1, path->size());
+	if (stat(path->c_str(), &path_stat) == 0)
+	{
 		if (IsRegularFile(path_stat))
 		{
 			uri_type_ = FILE;
-			*path = join_path;
 			stat_ = path_stat;
 			return;
 		}
@@ -131,17 +105,8 @@ void URI::FindFileIndex(const LocationDirective &location, std::string *path)
 
 bool URI::AllowAutoIndex(const LocationDirective &location, std::string *path) const
 {
-	if (!location.GetAutoIndex())
-	{
-		return false;
-	}
-
-	if (path->at(0) == '/' && path->size() >= 2)
-	{
-		*path = path->substr(1, path->size());
-	}
 	struct stat path_stat;
-	if (stat(path->c_str(), &path_stat) < 0)
+	if (!location.GetAutoIndex() || stat(path->c_str(), &path_stat) < 0)
 	{
 		return false;
 	}
@@ -176,4 +141,9 @@ std::string URI::GetPath() const
 std::string URI::GetQuery() const
 {
 	return query_;
+}
+
+struct stat URI::GetStat() const
+{
+	return stat_;
 }

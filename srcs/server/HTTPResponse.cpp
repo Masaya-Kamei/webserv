@@ -24,7 +24,7 @@ HTTPResponse::HTTPResponse(const HTTPMethod& method, int status_code, HTTPReques
 		body_ = method.GetBody();
 		connection_ = method.GetConnection();
 	}
-	SetResponse(connection_);
+	res_msg_ = ToString();
 }
 
 HTTPResponse::~HTTPResponse()
@@ -44,12 +44,6 @@ void HTTPResponse::SendResponse(ServerSocket *ssocket)
 	ssize_t send_size = send(ssocket->GetFd(), res_msg_.c_str(), res_msg_.size(), 0);
 	if (send_size == -1)
 		throw std::runtime_error("send error");
-}
-
-void HTTPResponse::SetResponse(bool connection)
-{
-	connection_ = connection;
-	res_msg_ = ToString();
 }
 
 std::string HTTPResponse::ToString()

@@ -28,7 +28,7 @@ class HTTPResponse
 		bool connection_;
 		std::string http_;
 
-		void SetResponse(bool connection);
+		void SetResponse();
 		std::string ToString();
 		void SetHeaderField();
 		std::string FindStatusMassage(int status_code) const;
