@@ -33,7 +33,7 @@ class URI
 		std::string path_;
 		std::string query_;
 		Type uri_type_;
-		// struct stat stat_;
+		struct stat stat_;
 
 		void SeparateRawUri();
 		void FindPath();

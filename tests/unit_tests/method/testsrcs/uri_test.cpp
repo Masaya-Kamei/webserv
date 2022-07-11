@@ -22,16 +22,17 @@ TEST(Uritest, Location)
 
 TEST(UriTest, UriGetType)
 {
-	Config config("conf/simple2.conf");
+	Config config("conf/default.conf");
+	// Config config("conf/simple2.conf");
 	std::vector<ServerDirective> servers = config.GetServers();
 	HTTPRequest req(HTTPRequest::GET);
 	HTTPMethod method;
 
 	method.ParseReq(req);
 
-	std::cout << "req_Uri: " << method.GetUri() << std::endl;
-	std::cout << "req_method: " << method.GetMethod() << std::endl;
-	URI uri(method.GetUri(), servers.at(0), method.GetMethod());
+	std::cout << "req_Uri: " << req.GetTarget() << std::endl;
+	std::cout << "req_method: " << req.GetMethod() << std::endl;
+	URI uri(req.GetTarget(), servers.at(0), method.GetMethod());
 
 	std::cout << "\n~ URI_INFO ~" << std::endl;
 	std::cout << uri.GetType() << std::endl;

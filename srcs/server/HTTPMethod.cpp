@@ -16,12 +16,9 @@ HTTPMethod::~HTTPMethod()
 /* parse request */
 void HTTPMethod::ParseReq(HTTPRequest req)
 {
-	// http_ = "HTTP/1.1";
-	// uri_ = "html/index.html";
-	// uri_ = "html/no.html";
 	http_ = req.GetVersion();
 	method_ = req.GetMethod();
-	uri_ = req.GetTarget();
+	// uri_ = req.GetTarget();
 	connection_ =  true;
 }
 
@@ -34,13 +31,12 @@ void HTTPMethod::setHeader(const std::pair<std::string, std::string> &elem)
 int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 {
 	ParseReq(req);
-	URI uri(uri_, server, method_);
+	const URI uri(req.GetTarget(), server, method_);
 
 	switch (uri.GetType())
 	{
 		case URI::FILE:
-			// HandleFile(req.GetMethod());
-			HandleFile(method_);
+			HandleFile(method_, uri);
 			ReadFile();
 		case URI::AUTOINDEX:
 		case URI::REDIRECT:
@@ -51,23 +47,23 @@ int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 	return status_code_;
 }
 
-void HTTPMethod::HandleFile(int method)
+void HTTPMethod::HandleFile(int method_, const URI &uri)
 {
-	if (method == HTTPRequest::GET)
+	if (method_ == HTTPRequest::GET)
 	{
-		ifs_.open(uri_.c_str());
+		ifs_.open(uri.GetPath().c_str());
 		if (!ifs_)
 		{
 			throw HTTPError(404);
 		}
 	}
-	else if (method == HTTPRequest::POST)
+	else if (method_ == HTTPRequest::POST)
 	{
-		ifs_.open(uri_.c_str());
+		ifs_.open(uri.GetPath().c_str());
 	}
-	else if (method == HTTPRequest::DELETE)
+	else if (method_ == HTTPRequest::DELETE)
 	{
-		int ret = unlink(uri_.c_str());
+		int ret = unlink(uri.GetPath().c_str());
 		if (ret != 0)
 		{
 			throw HTTPError(500);
@@ -101,10 +97,10 @@ int HTTPMethod::GetStatusCode() const
 	return status_code_;
 }
 
-std::string HTTPMethod::GetUri() const
-{
-	return uri_;
-}
+// std::string HTTPMethod::GetUri() const
+// {
+// 	return uri_;
+// }
 
 std::string HTTPMethod::GetHttp() const
 {
@@ -121,7 +117,7 @@ bool HTTPMethod::GetConnection() const
 	return connection_;
 }
 
-HTTPRequest::e_method HTTPMethod::GetMethod()
+HTTPRequest::e_method HTTPMethod::GetMethod() const
 {
 	return method_;
 }

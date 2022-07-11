@@ -60,13 +60,17 @@ bool URI::location_match(const std::string& location_path, std::string path)
 
 void URI::FindFile(std::string *path, const LocationDirective &location)
 {
-	if (path->at(path->size() - 1) == '/' && method_ == HTTPRequest::GET)
+	if (location.GetReturn().second.size())
 	{
-		FindFileIndex(location, path);
+		uri_type_ = REDIRECT;
 		return;
 	}
+	if (path->at(path->size() - 1) == '/' && method_ == HTTPRequest::GET)
+		{
+			FindFileIndex(location, path);
+			return;
+		}
 	*path = path->substr(1, path->size());
-
 	struct stat path_stat;
 
 	if (stat((*path).c_str(), &path_stat) < 0)
@@ -76,8 +80,9 @@ void URI::FindFile(std::string *path, const LocationDirective &location)
     if (IsRegularFile(path_stat))
     {
 		uri_type_ = FILE;
-        return;
-    }
+		stat_ = path_stat;
+		return;
+	}
     if (!AllowAutoIndex(location, path))
     {
         if (method_ == HTTPRequest::GET)
@@ -87,22 +92,24 @@ void URI::FindFile(std::string *path, const LocationDirective &location)
         else
         {
             uri_type_ = FILE;
-            return;
-        }
+			stat_ = path_stat;
+			return;
+		}
     }
 	uri_type_ = AUTOINDEX;
+	stat_ = path_stat;
 }
 
 void URI::FindFileIndex(const LocationDirective &location, std::string *path)
 {
-	std::string join_path = location.GetPath() + "/" + location.GetRoot();
-	const std::vector<std::string> index = location.GetIndex();
 	struct stat path_stat;
+	const std::vector<std::string> index = location.GetIndex();
 
 	for (size_t i = 0; i < index.size(); i++)
 	{
-		join_path += "/" + index.at(i);
+		std::string join_path = location.GetPath() + "/" + location.GetRoot();
 		join_path = join_path.substr(1, join_path.size());
+		join_path += "/" + index.at(i);
 		if (stat(join_path.c_str(), &path_stat) < 0)
 		{
 			continue;
@@ -111,6 +118,7 @@ void URI::FindFileIndex(const LocationDirective &location, std::string *path)
 		{
 			uri_type_ = FILE;
 			*path = join_path;
+			stat_ = path_stat;
 			return;
 		}
 	}
@@ -128,6 +136,10 @@ bool URI::AllowAutoIndex(const LocationDirective &location, std::string *path) c
 		return false;
 	}
 
+	if (path->at(0) == '/' && path->size() >= 2)
+	{
+		*path = path->substr(1, path->size());
+	}
 	struct stat path_stat;
 	if (stat(path->c_str(), &path_stat) < 0)
 	{
