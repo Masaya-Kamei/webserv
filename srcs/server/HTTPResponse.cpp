@@ -6,10 +6,6 @@
 
 const std::map<int, std::string> HTTPResponse::STATUS_MSG = SetStatusMsg();
 
-HTTPResponse::HTTPResponse(): sent_byte_(0)
-{
-}
-
 HTTPResponse::HTTPResponse(const HTTPMethod& method, int status_code, HTTPRequest req)
 {
 	status_code_ = status_code;
@@ -29,6 +25,11 @@ HTTPResponse::HTTPResponse(const HTTPMethod& method, int status_code, HTTPReques
 
 HTTPResponse::~HTTPResponse()
 {
+}
+
+std::string HTTPResponse::GetResMsg() const
+{
+    return res_msg_;
 }
 
 void HTTPResponse::Clear()

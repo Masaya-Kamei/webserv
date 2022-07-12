@@ -19,28 +19,24 @@ void HTTPMethod::ParseReq(HTTPRequest req)
 	method_ = req.GetMethod();
 	target_ = req.GetTarget();
 	connection_ = true;
+	status_code_ = 200;
 }
 
 int HTTPMethod::ExecHTTPMethod(HTTPRequest req, const ServerDirective &server)
 {
 	ParseReq(req);
 	const URI uri(target_, server, method_);
-
-	switch (uri.GetType())
-	{
-		case URI::FILE:
-			HandleFile(method_, uri);
-			ReadFile();
-		case URI::AUTOINDEX:
-		case URI::REDIRECT:
-		case URI::CGI:
-		default:
-			break;
-	}
+	void (HTTPMethod::*funcs[])(HTTPRequest::e_method, const URI&) = {
+		&HTTPMethod::HandleFile
+		// &HTTPMethod::HandleAutoIndex,
+		// &HTTPMethod::HandleRedirect,
+		// &HTTPMethod::HandleCGI
+	};
+	(this->*funcs[uri.GetType()])(method_, uri);
 	return status_code_;
 }
 
-void HTTPMethod::HandleFile(int method_, const URI &uri)
+void HTTPMethod::HandleFile(HTTPRequest::e_method method_, const URI &uri)
 {
 	if (method_ == HTTPRequest::DELETE)
 	{

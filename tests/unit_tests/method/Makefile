@@ -15,9 +15,9 @@ SRCS	=	\
 			HTTPServer.cpp \
 			HTTPRequest.cpp \
 			HTTPMethod.cpp \
-			URI.cpp
+			URI.cpp \
+			HTTPResponse.cpp
 			# main.cpp \
-			HTTPResponse.cpp \
 			
 SRCS	+=	uri_test.cpp
 

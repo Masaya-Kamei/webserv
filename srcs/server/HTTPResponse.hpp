@@ -12,11 +12,11 @@
 class HTTPResponse
 {
 	public:
-		HTTPResponse();
 		HTTPResponse(const HTTPMethod &method, int status_code, HTTPRequest req);
 		~HTTPResponse();
 
 		void SendResponse(ServerSocket *ssocket);
+		std::string GetResMsg() const;
 
 	private:
 		static const std::map<int, std::string> STATUS_MSG;
@@ -28,7 +28,6 @@ class HTTPResponse
 		bool connection_;
 		std::string http_;
 
-		void SetResponse();
 		std::string ToString();
 		void SetHeaderField();
 		std::string FindStatusMassage(int status_code) const;

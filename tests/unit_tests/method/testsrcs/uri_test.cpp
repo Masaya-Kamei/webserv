@@ -2,23 +2,7 @@
 #include "Config.hpp"
 #include "HTTPRequest.hpp"
 #include "HTTPMethod.hpp"
-
-/* 
-TEST(Uritest, Location)
-{
-	Config config("conf/simple2.conf");
-	std::vector<ServerDirective> servers = config.GetServers();
-	std::vector<ServerDirective>::const_iterator site = servers.begin();
-
-	for (; site != servers.end(); site++)
-	{
-		std::vector<LocationDirective> locations = site->GetLocations();
-		std::vector<LocationDirective>::const_iterator lite = locations.begin();
-		for (; lite != locations.end(); lite++)
-			std::cout << lite->GetPath() << std::endl;
-	}
-}
- */
+#include "HTTPResponse.hpp"
 
 TEST(UriTest, UriGetType)
 {
@@ -39,4 +23,28 @@ TEST(UriTest, UriGetType)
 	std::cout << uri.GetRawPath() << std::endl;
 	std::cout << uri.GetPath() << std::endl;
 	std::cout << uri.GetQuery() << std::endl;
+}
+
+TEST(MethodTest, CreateBody)
+{
+	// Config config("conf/default.conf");
+	Config config("conf/simple2.conf");
+	std::vector<ServerDirective> servers = config.GetServers();
+	HTTPRequest req(HTTPRequest::GET);
+	HTTPMethod method;
+	int status_code;
+
+
+	method.ParseReq(req);
+	URI uri(req.GetTarget(), servers.at(0), method.GetMethod());
+
+	std::cout << "\n~ URI_INFO ~" << std::endl;
+	std::cout << uri.GetType() << std::endl;
+	std::cout << uri.GetRawPath() << std::endl;
+	std::cout << uri.GetPath() << std::endl;
+	std::cout << uri.GetQuery() << std::endl;
+
+	status_code = method.ExecHTTPMethod(req, servers.at(0));
+	HTTPResponse res(method, status_code, req);
+	std::cout << res.GetResMsg() << std::endl;
 }

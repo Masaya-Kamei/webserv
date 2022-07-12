@@ -33,7 +33,7 @@ class HTTPMethod
 		bool connection_;
 		HTTPRequest::e_method method_;
 
-		void HandleFile(int method, const URI &uri);
+		void HandleFile(HTTPRequest::e_method method, const URI &uri);
 		void ReadFile();
 		void AppendBody(const char *buffer);
 };
