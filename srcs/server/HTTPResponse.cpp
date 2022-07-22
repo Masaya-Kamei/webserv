@@ -17,9 +17,9 @@ HTTPResponse::~HTTPResponse()
 {
 }
 
-void HTTPResponse::SendResponse(ServerSocket *ssocket)
+void HTTPResponse::SendResponse(const ServerSocket& ssocket)
 {
-	ssocket->SendData(res_msg_);
+	ssocket.SendData(res_msg_);
 }
 
 void HTTPResponse::AppendHeaders()

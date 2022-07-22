@@ -13,7 +13,7 @@ class HTTPResponse
 						const HTTPMethod &method, const ServerDirective &server_conf);
 		~HTTPResponse();
 
-		void SendResponse(ServerSocket *ssocket);
+		void SendResponse(const ServerSocket& ssocket);
 		const std::map<std::string, std::string> &GetHeader() const;
 		const std::string &GetResMsg() const;
 
